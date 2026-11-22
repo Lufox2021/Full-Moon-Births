@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Moon Births</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday learning tool, calm and exact
+   IDEA an astronomer's almanac page: a night band with the lunar cycle, a white working sheet below
+   PICTURE the working explorer itself; the header carries the eight-phase cycle drawn as discs
+   COLOUR night indigo band, white sheet, coral accent for the leading series
+   TYPE Archivo 800 titles + Inter text
+   LAYOUT band with title left, phase strip right; tabs; controls above a large chart or table */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#10131f);--ink:light-dark(#151826,#e9ebf5);--mute:light-dark(#5b6075,#a3a8bf);--line:light-dark(#dfe2ec,#2b3047);--panel:light-dark(#f4f5fa,#171b2c);--night:light-dark(#1f2456,#0b0e1a);--moon:#f3efe0;--acc:light-dark(#d9452c,#ff7a5c);--s1:light-dark(#d9452c,#ff7a5c);--s2:light-dark(#3346c4,#8c9bff);--s3:light-dark(#127f86,#4cc9cf);--s4:light-dark(#b07800,#f0b93a);--s5:light-dark(#8a4fbf,#c29cf0);--s6:light-dark(#5b6075,#a3a8bf);--s7:light-dark(#c73b78,#f27bb0);--s8:light-dark(#7a4e22,#d6a46e)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Archivo,Inter,sans-serif;letter-spacing:-.02em;line-height:1.1;margin:0}
+.top{background:var(--night);color:#fff;padding:28px max(4vw,16px) 0}
+.topin{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+.top h1{font-size:clamp(32px,4.4vw,48px);font-weight:800}
+.top p{margin:6px 0 0;color:#c9cdef;font-size:16px}
+.phases{display:flex;gap:10px;padding-bottom:4px}
+.phases svg{width:38px;height:38px}
+nav{max-width:1240px;margin:22px auto 0;display:flex;gap:4px;flex-wrap:wrap}
+nav button{font:600 15px Inter,sans-serif;background:transparent;color:#c9cdef;border:0;border-radius:10px 10px 0 0;padding:12px 18px;min-height:44px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--bg);color:var(--ink)}
+nav button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--s2);outline-offset:2px}
+nav button .lk{font-size:12px;opacity:.75;margin-left:6px}
+main{max-width:1240px;margin:0 auto;padding:28px max(4vw,16px) 64px}
+section[hidden]{display:none}
+h2{font-size:32px;margin-bottom:12px}
+h3{font-size:20px;margin:26px 0 8px}
+p{max-width:70ch}
+.mute{color:var(--mute)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:600;background:var(--panel)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.row{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:500;color:var(--mute)}
+label.inl{flex-direction:row;align-items:center;gap:8px;color:var(--ink);min-height:44px}
+select,input[type=number],input[type=text],textarea{font:16px Inter,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px}
+input[type=number]{width:7.5em}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--s2)}
+textarea{width:100%;min-height:120px;resize:vertical}
+button.b{font:600 15px Inter,sans-serif;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:10px 16px;min-height:44px;cursor:pointer}
+button.b:hover{border-color:var(--mute)}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.pri:disabled{opacity:.45;cursor:not-allowed}
+.filt summary{cursor:pointer;font-weight:600;min-height:32px}
+.count{font-weight:600}
+.fig{position:relative;min-height:460px;margin-top:16px;border:1px solid var(--line);border-radius:12px}
+.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:13px;padding:6px 9px;border-radius:6px;white-space:nowrap;display:none;z-index:2}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:14px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.pred{border-left:5px solid var(--acc);background:var(--panel);border-radius:0 12px 12px 0;padding:10px 16px;margin-bottom:18px}
+#filters{margin:0 0 16px}
+.pred b{font-family:Archivo,sans-serif}
+.lockmsg{padding:40px 0;text-align:left}
+.pager{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+td code{white-space:nowrap}
+#tbl td{white-space:nowrap}
+code{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:14px;overflow-wrap:anywhere}
+.err{color:var(--acc);font-weight:600}
+.dlg{display:none;margin-top:14px}
+.dlg.on{display:block}
+.grid2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px}
+.small{font-size:14px}
+footer{max-width:1240px;margin:0 auto;padding:0 max(4vw,16px) 40px;font-size:14px;color:var(--mute)}
+footer button{font:inherit;color:var(--mute);background:none;border:0;text-decoration:underline;cursor:pointer;padding:0}
+th.sort{cursor:pointer}
+@media(max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}.topin{grid-template-columns:minmax(0,1fr)}.phases svg{width:28px;height:28px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="topin">
+    <div>
+      <h1>Full Moon Births</h1>
+      <p>U.S. births per day, 1994–2014. Explore the data and test your own hypothesis.</p>
+    </div>
+    <div class="phases" id="phases" aria-hidden="true"></div>
+  </div>
+  <nav role="tablist" id="tabs">
+    <button role="tab" data-t="about">About the data</button>
+    <button role="tab" data-t="hyp">My hypothesis</button>
+    <button role="tab" data-t="table" data-lock>Table</button>
+    <button role="tab" data-t="plot" data-lock>Plot</button>
+    <button role="tab" data-t="stats" data-lock>Statistics</button>
+    <button role="tab" data-t="calc" data-lock>Calculator</button>
+  </nav>
+</header>
+
+<main>
+<div id="predbar"></div>
+
+<section id="about">
+  <h2>About the data</h2>
+  <div class="grid2">
+    <div>
+      <p>Each row is one calendar day in the United States, with the number of babies born that day. There are <span id="nrows">9,131</span> rows from two government sources:</p>
+      <div class="scroll"><table>
+        <thead><tr><th>Source</th><th>Agency</th><th>Dates covered</th><th class="n">Days</th></tr></thead>
+        <tbody>
+          <tr><td>CDC</td><td>Centers for Disease Control and Prevention, National Center for Health Statistics</td><td>Jan 1, 1994 – Dec 31, 2003</td><td class="n">3,652</td></tr>
+          <tr><td>SSA</td><td>Social Security Administration</td><td>Jan 1, 2000 – Dec 31, 2014</td><td class="n">5,479</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small mute">Original files: FiveThirtyEight, <a href="https://github.com/fivethirtyeight/data/tree/master/births">github.com/fivethirtyeight/data/tree/master/births</a>. The moon and holiday columns were added for this exercise.</p>
+      <h3>What to do</h3>
+      <p>Start with <b>My hypothesis</b>. Once you lock it in, the Table, Plot, Statistics and Calculator tabs open. How you use them is up to you.</p>
+      <p><b>Stuck? Phone a friend.</b> Post a question in the class discussion thread, or ask your instructor.</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Columns</h3>
+      <div class="scroll"><table>
+        <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>date</code></td><td>The calendar day</td></tr>
+          <tr><td><code>year</code>, <code>month</code>, <code>day_of_month</code></td><td>Parts of the date</td></tr>
+          <tr><td><code>day_of_week</code></td><td>Monday through Sunday</td></tr>
+          <tr><td><code>births</code></td><td>Number of births recorded for that day</td></tr>
+          <tr><td><code>source</code></td><td>CDC or SSA (see left)</td></tr>
+          <tr><td><code>moon_phase</code></td><td>One of eight named phases at noon that day: New moon, Waxing crescent, First quarter, Waxing gibbous, Full moon, Waning gibbous, Last quarter, Waning crescent. Each named phase covers about 3.7 days of the 29.5-day cycle.</td></tr>
+          <tr><td><code>full_moon_date</code></td><td>Yes if the exact moment of full moon fell on this calendar day</td></tr>
+          <tr><td><code>moon_age_days</code></td><td>Days since the most recent new moon, at noon</td></tr>
+          <tr><td><code>moon_illuminated_pct</code></td><td>Approximate percent of the moon's face lit, at noon</td></tr>
+          <tr><td><code>holiday</code></td><td>U.S. federal holidays plus Christmas Eve and New Year's Eve, on their calendar dates; otherwise None</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small mute">Moon times are calculated with the method in Jean Meeus, <i>Astronomical Algorithms</i> (2nd ed.), chapter 49, and assigned to calendar days using U.S. Eastern Standard Time.</p>
+    </div>
+  </div>
+</section>
+
+<section id="hyp" hidden>
+  <h2>My hypothesis</h2>
+  <div id="hypform">
+    <p>Before you look at any data, write down what you think is true. You can't change this after you lock it in.</p>
+    <div class="panel" style="max-width:760px">
+      <label for="htext">My hypothesis, in my own words</label>
+      <textarea id="htext" placeholder="Write your hypothesis here"></textarea>
+      <div class="row" style="margin-top:14px">
+        <label for="hpct">I expect ___% more births on full-moon days.
+          <span class="row" style="gap:8px;align-items:center"><input type="number" id="hpct" step="0.1"><span style="color:var(--ink)">%</span></span>
+        </label>
+      </div>
+      <p class="small mute">Enter 0 if you expect no difference, or a negative number if you expect fewer.</p>
+      <button class="b pri" id="lockbtn" disabled>Lock in my hypothesis</button>
+      <div class="dlg" id="lockdlg">
+        <p><b>Lock it in?</b> Your hypothesis and prediction can't be changed afterward.</p>
+        <div class="row"><button class="b pri" id="lockyes">Yes, lock it in</button><button class="b" id="lockno">Not yet</button></div>
+      </div>
+    </div>
+  </div>
+  <div id="hypdone" hidden>
+    <p>Your hypothesis is locked. Copy it into the discussion board as your first post.</p>
+    <div class="pred" id="hypcard"></div>
+    <div class="row"><button class="b pri" id="copyhyp">Copy my prediction</button><span id="copied" class="mute"></span></div>
+    <textarea id="copybox" readonly style="margin-top:12px;display:none"></textarea>
+  </div>
+</section>
+
+<div id="filters" hidden>
+  <details class="panel filt">
+    <summary>Filters · <span class="count" id="fcount"></span></summary>
+    <div class="row" style="margin-top:12px" id="fbox"></div>
+  </details>
+</div>
+
+<section id="table" hidden>
+  <h2>Table</h2>
+  <div class="scroll" id="tbl"></div>
+  <div class="pager"><button class="b" id="prev">Previous</button><span id="pginfo" class="mute"></span><button class="b" id="next">Next</button></div>
+</section>
+
+<section id="plot" hidden>
+  <h2>Plot</h2>
+  <div class="panel"><div class="row" id="pctl"></div></div>
+  <div class="fig" id="fig"><canvas id="cv"></canvas><div class="tip" id="tip"></div></div>
+  <div class="legend" id="legend"></div>
+  <p class="small mute" id="cap"></p>
+  <div id="fitout"></div>
+</section>
+
+<section id="stats" hidden>
+  <h2>Statistics</h2>
+  <div class="panel"><div class="row">
+    <label for="sval">Values from<select id="sval"></select></label>
+    <label for="sgrp">Grouped by<select id="sgrp"></select></label>
+    <label for="sgrp2">and by<select id="sgrp2"></select></label>
+    <button class="b" id="scopy">Copy table</button><span id="scopied" class="mute small"></span>
+  </div></div>
+  <div class="scroll" id="stbl" style="margin-top:16px"></div>
+  <p class="small mute">SD is the standard deviation. SE is the standard error of the mean (SD divided by the square root of n).</p>
+</section>
+
+<section id="calc" hidden>
+  <h2>Calculator</h2>
+  <p>Make a new column from existing ones. It appears in every tab, and is calculated for all 9,131 rows.</p>
+  <div class="panel">
+    <div class="row">
+      <label for="cname">New column name<input type="text" id="cname" placeholder="e.g. births_thousands" style="width:15em"></label>
+      <label for="cexpr" style="flex:1 1 360px">Formula<input type="text" id="cexpr" placeholder="e.g. births / 1000"></label>
+      <button class="b pri" id="cadd">Add column</button>
+    </div>
+    <p id="cerr" class="err small"></p>
+    <details class="small"><summary style="cursor:pointer;min-height:32px"><b>What you can use in a formula</b></summary>
+      <ul>
+        <li>Any column name, such as <code>births</code> or <code>moon_age_days</code></li>
+        <li>Arithmetic: <code>+ - * / ( )</code> and powers with <code>**</code></li>
+        <li>Comparisons give 1 (true) or 0 (false): <code>day_of_week == "Monday"</code>, <code>births &gt; 12000</code></li>
+        <li>Choices: <code>condition ? a : b</code>, for example <code>moon_age_days &lt; 15 ? "waxing" : "waning"</code></li>
+        <li>Functions: <code>log(x)</code> (natural), <code>log10(x)</code>, <code>sqrt(x)</code>, <code>abs(x)</code>, <code>round(x)</code></li>
+        <li><code>mean("births")</code>: the mean of a column over all rows</li>
+        <li><code>meanBy("births", "year")</code>: for each row, the mean of births over all rows that share its year. You can list more than one column: <code>meanBy("births", "year", "source")</code></li>
+      </ul>
+    </details>
+  </div>
+  <h3>My columns</h3>
+  <div id="clist" class="mute">None yet.</div>
+  <h3>Preview</h3>
+  <div class="scroll" id="cprev"></div>
+</section>
+</main>
+<footer>Prototype for instructor review. <button id="reset">Start over (clears this browser's saved hypothesis)</button>
+  <span class="dlg" id="resetdlg"> Clear everything? <button id="resetyes">Yes, clear</button> · <button id="resetno">Cancel</button></span>
+</footer>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const KEY='fmb-proto-v1';
+let state=store.get(KEY)||{hyp:null,calc:[]};
+const save=()=>store.set(KEY,state);
+
+/* phase strip */
+const phaseSvg=f=>{const r=16,cx=19,cy=19;const k=Math.cos(2*Math.PI*f);const waxing=f<.5;const rx=Math.abs(k)*r;
+  const lit=`M${cx} ${cy-r} A${r} ${r} 0 0 ${waxing?1:0} ${cx} ${cy+r} A${rx} ${r} 0 0 ${(k>0)===waxing?0:1} ${cx} ${cy-r}Z`;
+  return `<svg viewBox="0 0 38 38"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#353b7a"/><path d="${lit}" fill="#f3efe0"/></svg>`};
+$('phases').innerHTML=[0,.125,.25,.375,.5,.625,.75,.875].map(phaseSvg).join('');
+
+/* data */
+const WD=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const PH=['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'];
+const HOL=['None',"New Year's Day",'Martin Luther King Jr. Day',"Presidents' Day",'Memorial Day','Independence Day','Labor Day','Columbus Day','Veterans Day','Thanksgiving','Christmas Eve','Christmas Day',"New Year's Eve"];
+const ORDER={day_of_week:WD,moon_phase:PH,holiday:HOL,source:['CDC','SSA'],full_moon_date:['No','Yes']};
+const BASE=['date','year','month','day_of_month','day_of_week','births','source','moon_phase','full_moon_date','moon_age_days','moon_illuminated_pct','holiday'];
+const NUMS=new Set(['year','month','day_of_month','births','moon_age_days','moon_illuminated_pct']);
+let rows=[];let cols=BASE.slice();let ctype={};
+BASE.forEach(c=>ctype[c]=NUMS.has(c)?'num':(c==='date'?'date':'cat'));
+
+const fmt=(v,d)=>{if(v==null||Number.isNaN(v))return '';if(typeof v!=='number')return v;const s=v.toLocaleString(undefined,{maximumFractionDigits:d??2});return /^-0(\.0*)?$/.test(s)?s.slice(1):s};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* tabs */
+let cur='about';
+function locked(){return !state.hyp}
+function show(t){
+  if(locked()&&['table','plot','stats','calc'].includes(t))t='hyp';
+  cur=t;
+  document.querySelectorAll('#tabs button').forEach(b=>{b.setAttribute('aria-selected',b.dataset.t===t);const lk=b.querySelector('.lk');if(lk)lk.remove();if(b.hasAttribute('data-lock')&&locked())b.insertAdjacentHTML('beforeend','<span class="lk">locked</span>')});
+  ['about','hyp','table','plot','stats','calc'].forEach(s=>$(s).hidden=s!==t);
+  const fl=$('filters');fl.hidden=!['table','plot','stats'].includes(t);if(!fl.hidden)$(t).querySelector('h2').after(fl);
+  $('predbar').hidden=t==='hyp';
+  if(t==='table')renderTable();if(t==='plot')drawPlot();if(t==='stats')renderStats();if(t==='calc')renderCalc();
+}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.t)});
+
+/* hypothesis */
+const hReady=()=>{$('lockbtn').disabled=!($('htext').value.trim()&&$('hpct').value!=='')};
+$('htext').addEventListener('input',hReady);$('hpct').addEventListener('input',hReady);
+$('lockbtn').onclick=()=>$('lockdlg').classList.add('on');
+$('lockno').onclick=()=>$('lockdlg').classList.remove('on');
+$('lockyes').onclick=()=>{state.hyp={text:$('htext').value.trim(),pct:parseFloat($('hpct').value),time:new Date().toISOString()};save();renderHyp();show('hyp')};
+function hypText(){const h=state.hyp,t=new Date(h.time);return `My hypothesis (locked ${t.toLocaleString()}):\n${h.text}\n\nMy prediction: I expect ${h.pct}% more births on full-moon days.`}
+function renderHyp(){
+  const h=state.hyp;$('hypform').hidden=!!h;$('hypdone').hidden=!h;
+  if(!h){$('predbar').innerHTML='';return}
+  const card=`<b>My hypothesis</b> <span class="mute small">locked ${esc(new Date(h.time).toLocaleString())}</span><br>${esc(h.text)}<br><b>My prediction:</b> I expect ${esc(h.pct)}% more births on full-moon days.`;
+  $('hypcard').innerHTML=card;$('predbar').innerHTML=`<div class="pred small">${card}</div>`;
+}
+$('copyhyp').onclick=async()=>{const t=hypText();try{await navigator.clipboard.writeText(t);$('copied').textContent='Copied.'}catch(e){const b=$('copybox');b.style.display='block';b.value=t;b.select();$('copied').textContent='Select the text below and copy it.'}};
+$('reset').onclick=()=>$('resetdlg').classList.add('on');
+$('resetno').onclick=()=>$('resetdlg').classList.remove('on');
+$('resetyes').onclick=()=>{store.del(KEY);state={hyp:null,calc:[]};cols=BASE.slice();Object.keys(ctype).forEach(k=>{if(!BASE.includes(k))delete ctype[k]});rows.forEach(r=>{for(const k in r)if(!BASE.includes(k))delete r[k]});$('resetdlg').classList.remove('on');$('htext').value='';$('hpct').value='';hReady();renderHyp();buildControls();show('about')};
+
+/* filters */
+const FCATS=['source','day_of_week','moon_phase','full_moon_date','holiday'];
+let filt={y0:1994,y1:2014};
+function buildFilters(){
+  $('fbox').innerHTML=`<label for="fy0">Years from<input type="number" id="fy0" min="1994" max="2014" value="${filt.y0}"></label><label for="fy1">to<input type="number" id="fy1" min="1994" max="2014" value="${filt.y1}"></label>`+
+  FCATS.map(c=>`<label for="f_${c}">${c}<select id="f_${c}"><option value="">Any</option>${c==='holiday'?'<option value="__any">Any holiday</option>':''}${ORDER[c].map(v=>`<option${filt[c]===v?' selected':''}>${esc(v)}</option>`).join('')}</select></label>`).join('')+
+  `<button class="b" id="fclear">Clear filters</button>`;
+  FCATS.forEach(c=>{const s=$('f_'+c);if(filt[c])s.value=filt[c];s.onchange=()=>{filt[c]=s.value;refresh()}});
+  $('fy0').onchange=()=>{filt.y0=+$('fy0').value||1994;refresh()};$('fy1').onchange=()=>{filt.y1=+$('fy1').value||2014;refresh()};
+  $('fclear').onclick=()=>{filt={y0:1994,y1:2014};buildFilters();refresh()};
+}
+function view(){return rows.filter(r=>r.year>=filt.y0&&r.year<=filt.y1&&FCATS.every(c=>!filt[c]||(filt[c]==='__any'?r[c]!=='None':r[c]===filt[c])))}
+let V=[];
+function refresh(){V=view();$('fcount').textContent=`showing ${V.length.toLocaleString()} of ${rows.length.toLocaleString()} days`;page=0;if(cur==='table')renderTable();if(cur==='plot')drawPlot();if(cur==='stats')renderStats()}
+
+/* table */
+let page=0,sortC='date',sortD=1;const PS=100;
+function sorted(a){const c=sortC;return a.slice().sort((x,y)=>{const p=x[c],q=y[c];return (p<q?-1:p>q?1:0)*sortD})}
+function renderTable(){
+  const s=sorted(V),n=Math.max(1,Math.ceil(s.length/PS));page=Math.min(page,n-1);const part=s.slice(page*PS,page*PS+PS);
+  $('tbl').innerHTML=`<table><thead><tr>${cols.map(c=>`<th class="sort${ctype[c]==='num'?' n':''}" data-c="${c}">${esc(c)}${sortC===c?(sortD>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>${part.map(r=>`<tr>${cols.map(c=>`<td${ctype[c]==='num'?' class="n"':''}>${esc(c==='year'?r[c]:fmt(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  $('pginfo').textContent=`Rows ${s.length?page*PS+1:0}–${Math.min(s.length,(page+1)*PS)} of ${s.length.toLocaleString()}`;
+  $('prev').disabled=page===0;$('next').disabled=page>=n-1;
+}
+$('tbl').addEventListener('click',e=>{const th=e.target.closest('th');if(!th)return;const c=th.dataset.c;if(sortC===c)sortD=-sortD;else{sortC=c;sortD=1}renderTable()});
+$('prev').onclick=()=>{page--;renderTable()};$('next').onclick=()=>{page++;renderTable()};
+
+/* helpers */
+const numCols=()=>cols.filter(c=>ctype[c]==='num');
+const catCols=()=>cols.filter(c=>ctype[c]==='cat'||['year','month','day_of_month'].includes(c));
+function levels(c,a){const set=new Set(a.map(r=>r[c]));const o=ORDER[c];if(o)return o.filter(v=>set.has(v));return [...set].sort((x,y)=>typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))}
+function summ(vals){const v=vals.filter(x=>typeof x==='number'&&!Number.isNaN(x)).sort((a,b)=>a-b);const n=v.length;if(!n)return{n:0};const mean=v.reduce((a,b)=>a+b,0)/n;const sd=n>1?Math.sqrt(v.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)):0;const med=n%2?v[(n-1)/2]:(v[n/2-1]+v[n/2])/2;return{n,mean,med,sd,se:sd/Math.sqrt(n),min:v[0],max:v[n-1],sum:mean*n}}
+const opt=(arr,sel,blank)=>(blank?`<option value="">${blank}</option>`:'')+arr.map(c=>`<option${c===sel?' selected':''}>${esc(c)}</option>`).join('');
+
+/* stats */
+function buildStats(){
+  const sv=$('sval').value||'births',g=$('sgrp').value,g2=$('sgrp2').value;
+  $('sval').innerHTML=opt(numCols(),numCols().includes(sv)?sv:'births');
+  $('sgrp').innerHTML=opt(catCols(),g,'(none)');$('sgrp2').innerHTML=opt(catCols(),g2,'(none)');
+}
+['sval','sgrp','sgrp2'].forEach(id=>$(id).addEventListener('change',renderStats));
+let statRows=[];
+function renderStats(){
+  const v=$('sval').value,g=$('sgrp').value,g2=$('sgrp2').value;const gs=[g,g2].filter(Boolean);
+  let groups=[[[],V]];
+  gs.forEach(c=>{const nx=[];groups.forEach(([k,a])=>levels(c,a).forEach(l=>nx.push([k.concat(l),a.filter(r=>r[c]===l)])));groups=nx});
+  statRows=groups.map(([k,a])=>[k,summ(a.map(r=>r[v]))]);
+  const head=gs.length?gs:['group'];
+  $('stbl').innerHTML=`<table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}<th class="n">n</th><th class="n">mean</th><th class="n">median</th><th class="n">SD</th><th class="n">SE</th><th class="n">min</th><th class="n">max</th></tr></thead><tbody>${statRows.map(([k,s])=>`<tr>${(k.length?k:['All selected days']).map(x=>`<td>${esc(x)}</td>`).join('')}<td class="n">${fmt(s.n)}</td><td class="n">${fmt(s.mean,1)}</td><td class="n">${fmt(s.med,1)}</td><td class="n">${fmt(s.sd,1)}</td><td class="n">${fmt(s.se,1)}</td><td class="n">${fmt(s.min,1)}</td><td class="n">${fmt(s.max,1)}</td></tr>`).join('')}</tbody></table>`;
+}
+$('scopy').onclick=async()=>{const g=[$('sgrp').value,$('sgrp2').value].filter(Boolean);const lines=[[...(g.length?g:['group']),'n','mean','median','SD','SE','min','max'].join('\t')].concat(statRows.map(([k,s])=>[...(k.length?k:['All']),s.n,s.mean,s.med,s.sd,s.se,s.min,s.max].join('\t')));try{await navigator.clipboard.writeText(lines.join('\n'));$('scopied').textContent='Copied. Paste into Excel or a post.'}catch(e){$('scopied').textContent='Copy is blocked here.'}};
+
+/* calculator */
+const FN={log:Math.log,log10:Math.log10,sqrt:Math.sqrt,abs:Math.abs,round:Math.round};
+function compile(expr){
+  const names=cols.filter(c=>/^[A-Za-z_]\w*$/.test(c));
+  const cache={};
+  const mean=c=>{if(!(c in ctype))throw Error(`No column named "${c}"`);const k='m|'+c;if(!(k in cache))cache[k]=summ(rows.map(r=>r[c])).mean;return cache[k]};
+  const f=new Function('__r','__f','__mb',...names,`const {log,log10,sqrt,abs,round}=__f;const mean=__f.mean;const meanBy=(c,...g)=>__mb(__r,c,g);return (${expr});`);
+  const mb=(r,c,g)=>{if(!(c in ctype))throw Error(`No column named "${c}"`);g.forEach(x=>{if(!(x in ctype))throw Error(`No column named "${x}"`)});const k='b|'+c+'|'+g.join('|');if(!cache[k]){const acc=new Map();rows.forEach(q=>{const key=g.map(x=>q[x]).join('\u0001');const e=acc.get(key)||[0,0];if(typeof q[c]==='number'&&!Number.isNaN(q[c])){e[0]+=q[c];e[1]++}acc.set(key,e)});cache[k]=acc}const e=cache[k].get(g.map(x=>r[x]).join('\u0001'));return e&&e[1]?e[0]/e[1]:NaN};
+  const fns=Object.assign({mean},FN);
+  return r=>{let v=f(r,fns,mb,...names.map(n=>r[n]));if(typeof v==='boolean')v=v?1:0;return v};
+}
+function applyCalc(c){const fn=compile(c.expr);rows.forEach(r=>{r[c.name]=fn(r)});const s=rows.find(r=>r[c.name]!=null&&!Number.isNaN(r[c.name]));ctype[c.name]=s&&typeof s[c.name]==='string'?'cat':'num';if(!cols.includes(c.name))cols.push(c.name)}
+$('cadd').onclick=()=>{
+  const name=$('cname').value.trim(),expr=$('cexpr').value.trim();$('cerr').textContent='';
+  if(!/^[A-Za-z_]\w*$/.test(name)){$('cerr').textContent='Use a name made of letters, digits and underscores, starting with a letter.';return}
+  if(cols.includes(name)){$('cerr').textContent='That column already exists. Pick another name.';return}
+  if(!expr){$('cerr').textContent='Enter a formula.';return}
+  try{applyCalc({name,expr})}catch(e){$('cerr').textContent='That formula did not work: '+e.message;rows.forEach(r=>delete r[name]);delete ctype[name];cols=cols.filter(c=>c!==name);return}
+  state.calc.push({name,expr});save();$('cname').value='';$('cexpr').value='';buildControls();renderCalc();refresh();
+};
+function renderCalc(){
+  $('clist').innerHTML=state.calc.length?`<table><thead><tr><th>Name</th><th>Formula</th><th></th></tr></thead><tbody>${state.calc.map((c,i)=>`<tr><td><code>${esc(c.name)}</code></td><td><code>${esc(c.expr)}</code></td><td><button class="b" data-del="${i}">Remove</button></td></tr>`).join('')}</tbody></table>`:'None yet.';
+  const show=['date','births','day_of_week','moon_phase',...state.calc.map(c=>c.name)];
+  $('cprev').innerHTML=`<table><thead><tr>${show.map(c=>`<th${ctype[c]==='num'?' class="n"':''}>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,8).map(r=>`<tr>${show.map(c=>`<td${ctype[c]==='num'?' class="n"':''}>${esc(fmt(r[c],3))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+$('clist').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;const c=state.calc.splice(+b.dataset.del,1)[0];rows.forEach(r=>delete r[c.name]);delete ctype[c.name];cols=cols.filter(x=>x!==c.name);save();buildControls();renderCalc();refresh()});
+
+/* plot controls */
+const VSTY=['dots','line','dots and line','bars'];
+const CSTY=['bars','points','points joined by a line'];
+const P={vstyle:'dots',cstyle:'bars',fit:false,mode:'vs',y:'births',x:'day_of_week',by:'',type:'bar',split:'',stat:'mean',spread:'none',zero:true,agg:'monthly',draw:'lines',bins:40,norm:false,avg:true,abins:20,sx:'',sy:'',factors:['day_of_week','moon_phase'],ia:'moon_phase',ib:'day_of_week',sespread:'none'};
+const CATX=new Set(['year','month','day_of_month']);
+function xKind(c){if(c==='date')return 'date';if(ctype[c]==='cat'||CATX.has(c))return 'cat';return 'num'}
+function axisBins(c,a){
+  if(!c)return{L:[],key:()=>undefined,binned:false};
+  const F=(v)=>typeof fmtc==='function'?fmtc(c,v):fmt(v);
+  if(ctype[c]!=='num')return{L:levels(c,a),key:r=>r[c],binned:false};
+  const vs=a.map(r=>r[c]).filter(v=>typeof v==='number'&&!Number.isNaN(v));
+  if(!vs.length)return{L:[],key:()=>undefined,binned:false};
+  const u=[...new Set(vs)].sort((x,y)=>x-y);
+  if(u.length<=12)return{L:u.map(F),key:r=>typeof r[c]==='number'&&!Number.isNaN(r[c])?F(r[c]):undefined,binned:false};
+  const lo=u[0],hi=u[u.length-1],nb=8,w=(hi-lo)/nb||1;
+  const lab=i=>`${F(lo+i*w)}–${F(lo+(i+1)*w)}`;
+  const L=[];for(let i=0;i<nb;i++)L.push(lab(i));
+  return{L,key:r=>{const v=r[c];if(typeof v!=='number'||Number.isNaN(v))return undefined;return lab(Math.min(nb-1,Math.max(0,Math.floor((v-lo)/w))))},binned:true};
+}
+function plotType(){if(P.mode==='dist')return 'hist';if(P.mode==='main')return 'main';if(P.mode==='inter')return 'inter';const k=xKind(P.x);return k==='date'?'line':k==='cat'?'bar':'scatter'}
+function buildPlot(){
+  const N=numCols();if(!N.includes(P.y))P.y='births';
+  const X=cols.filter(c=>c!==P.y);if(!X.includes(P.x))P.x='day_of_week';
+  const B=cols.filter(c=>c!==P.x&&c!==P.y);if(P.by&&!B.includes(P.by))P.by='';
+  const sel=(id,lab,arr,v,blank)=>`<label for="${id}">${lab}<select id="${id}">${opt(arr,v,blank)}</select></label>`;
+  P.type=plotType();
+  const MODES={vs:'response vs. a variable',dist:'distribution of the response',main:'main effects',inter:'interaction'};
+  let h=sel('p_mode','Plot',Object.values(MODES),MODES[P.mode]);
+  h+=sel('p_y','Response (y)',N,P.y);
+  if(P.mode==='vs')h+=sel('p_x','Plotted against (x)',X,P.x);
+  if(P.mode==='vs'||P.mode==='dist')h+=sel('p_by','By',B,P.by,'(none)');
+  if(P.mode==='vs'&&P.x&&P.y)h+=xKind(P.x)==='num'?sel('p_vstyle','Draw as',VSTY,P.vstyle):sel('p_cstyle','Draw as',CSTY,P.cstyle);
+  const C=catCols();const AXC=['inter','main'].includes(P.mode)?cols.filter(c=>c!==P.y):C;
+  P.factors=P.factors.filter(f=>AXC.includes(f));if(!AXC.includes(P.ia))P.ia='moon_phase';if(!AXC.includes(P.ib)||P.ib===P.ia)P.ib=AXC.find(c=>c!==P.ia);
+  if(P.type==='main')h+=`<fieldset style="border:0;padding:0;margin:0"><legend style="font-size:14px;font-weight:500;color:var(--mute);margin-bottom:4px">Variables (up to 4)</legend><div class="row" style="gap:2px 16px">${AXC.map(c=>`<label class="inl" style="min-height:32px"><input type="checkbox" class="p_fac" value="${esc(c)}"${P.factors.includes(c)?' checked':''}${!P.factors.includes(c)&&P.factors.length>=4?' disabled':''}>${esc(c)}</label>`).join('')}</div></fieldset>`;
+  if(P.type==='inter')h+=sel('p_ia','Variable on x',AXC,P.ia)+sel('p_ib','One line for each',AXC.filter(c=>c!==P.ia),P.ib);
+  if(P.type==='main'||P.type==='inter')h+=sel('p_se','Spread bars',['none','±1 SE'],P.sespread);
+  if(P.type==='bar')h+=sel('p_stat','Show',['mean','median','sum','count'],P.stat)+sel('p_spread','Spread bars',['none','±1 SD','±1 SE'],P.spread)+`<label class="inl"><input type="checkbox" id="p_zero"${P.zero?' checked':''}>y axis starts at 0</label>`+(catNums(P.x,V)?`<label class="inl"><input type="checkbox" id="p_fit"${P.fit?' checked':''}>fit a straight line</label>`:'');
+  if(P.type==='line')h+=sel('p_agg','Average per',['day','week','month','year'],{daily:'day',weekly:'week',monthly:'month',yearly:'year'}[P.agg])+sel('p_draw','Draw as',['lines','dots'],P.draw)+`<label class="inl"><input type="checkbox" id="p_zero"${P.zero?' checked':''}>y axis starts at 0</label>`;
+  if(P.type==='scatter')h+=(P.vstyle==='bars'?`<label class="inl"><input type="checkbox" id="p_zero"${P.zero?' checked':''}>y axis starts at 0</label>`:'')+(P.vstyle==='dots'||P.vstyle==='dots and line'?`<label class="inl"><input type="checkbox" id="p_avg"${P.avg?' checked':''}>show averages</label><label for="p_abins">in how many x ranges<input type="number" id="p_abins" min="2" max="100" value="${P.abins}"></label>`:'')+`<label class="inl"><input type="checkbox" id="p_fit"${P.fit?' checked':''}>fit a straight line</label>`;
+  if(P.type==='hist')h+=`<label for="p_bins">Bins<input type="number" id="p_bins" min="3" max="200" value="${P.bins}"></label><label class="inl"><input type="checkbox" id="p_norm"${P.norm?' checked':''}>show as % of each group</label>`;
+  $('pctl').innerHTML=h;
+  const on=(id,f,rebuild)=>{const e=$(id);if(e)e.onchange=()=>{f(e);if(rebuild)buildPlot();drawPlot()}};
+  on('p_mode',e=>P.mode=Object.keys(MODES).find(k=>MODES[k]===e.value),1);
+  on('p_ia',e=>P.ia=e.value,1);on('p_ib',e=>P.ib=e.value,1);on('p_se',e=>P.sespread=e.value);
+  document.querySelectorAll('.p_fac').forEach(cb=>cb.onchange=()=>{P.factors=[...document.querySelectorAll('.p_fac:checked')].map(x=>x.value);buildPlot();drawPlot()});
+  on('p_y',e=>P.y=e.value,1);on('p_x',e=>P.x=e.value,1);on('p_by',e=>P.by=e.value,1);
+  on('p_stat',e=>P.stat=e.value);on('p_spread',e=>P.spread=e.value);on('p_zero',e=>P.zero=e.checked);
+  on('p_agg',e=>P.agg={day:'daily',week:'weekly',month:'monthly',year:'yearly'}[e.value]);on('p_draw',e=>P.draw=e.value);
+  on('p_fit',e=>P.fit=e.checked);
+  on('p_vstyle',e=>{P.vstyle=e.value;P.zero=(e.value==='bars')},1);
+  on('p_cstyle',e=>{P.cstyle=e.value;P.zero=(e.value==='bars')},1);
+  on('p_avg',e=>P.avg=e.checked);on('p_abins',e=>P.abins=Math.max(2,Math.min(100,+e.value||20)));
+  on('p_bins',e=>P.bins=Math.max(3,Math.min(200,+e.value||40)));on('p_norm',e=>P.norm=e.checked);
+}
+function buildControls(){buildStats();buildPlot()}
+
+/* drawing */
+const cv=$('cv'),tip=$('tip');let hits=[];
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function resolveColor(v){const d=document.createElement('span');d.style.color=`var(${v})`;document.body.appendChild(d);const c=getComputedStyle(d).color;d.remove();return c}
+function catNums(c,a){if(!c)return null;const L=levels(c,a);if(L.length<3)return null;const X=[];
+  for(const l of L){const m=/^(-?\d+(?:\.\d+)?)s?$/.exec(String(l).trim());if(!m)return null;X.push(+m[1])}
+  if(new Set(X).size!==X.length)return null;return{L,X}}
+const rowLab=r=>{const q=[];if(r.date!=null)q.push(r.date);else{if(r.location!=null)q.push(r.location);if(r.year!=null)q.push(r.year)}return q.length?q.join(' ')+': ':''};
+function regress(pts){
+  const n=pts.length; if(n<3) return null;
+  let sx=0,sy=0; for(const [x,y] of pts){sx+=x;sy+=y}
+  const mx=sx/n,my=sy/n; let sxx=0,sxy=0,syy=0;
+  for(const [x,y] of pts){sxx+=(x-mx)**2;sxy+=(x-mx)*(y-my);syy+=(y-my)**2}
+  if(!sxx) return null;
+  const b=sxy/sxx, a=my-b*mx;
+  const sse=Math.max(0,syy-b*sxy), s=Math.sqrt(sse/(n-2));
+  return {a,b,seb:s/Math.sqrt(sxx), sea:s*Math.sqrt(1/n+mx*mx/sxx),
+          n, r2:syy?1-sse/syy:0, resid:s,
+          xmin:Math.min(...pts.map(q=>q[0])), xmax:Math.max(...pts.map(q=>q[0]))};
+}
+const pm=(v,e)=>{const d=Math.max(0,Math.min(8,(e>0?Math.ceil(-Math.log10(e)):3)+1));
+  return `${v.toFixed(d)} \u00b1 ${e.toFixed(d)}`};
+function ticks(lo,hi,n){if(hi===lo){hi=lo+1}const raw=(hi-lo)/n,p=10**Math.floor(Math.log10(raw)),m=raw/p,st=(m<1.5?1:m<3?2:m<7?5:10)*p;const out=[];for(let t=Math.ceil(lo/st)*st;t<=hi+st*1e-9;t+=st)out.push(+t.toFixed(10));return out}
+function drawPlot(){
+  if(cur!=='plot')return;
+  P.type=plotType();P.split=P.type==='inter'?P.ib:P.type==='main'?'':P.by;P.sx=P.x;P.sy=P.y;
+  const fig=$('fig'),W=fig.clientWidth,H=fig.clientHeight,dpr=window.devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+  const ink=resolveColor('--ink'),mute=resolveColor('--mute'),line=resolveColor('--line');
+  const S=[1,2,3,4,5,6,7,8].map(i=>resolveColor('--s'+i));
+  hits=[];g.font='14px Inter, sans-serif';$('fitout').innerHTML='';
+  const M={l:86,r:20,t:P.type==='main'?44:20,b:P.type==='main'||P.type==='inter'?104:54};const pw=W-M.l-M.r,ph=H-M.t-M.b;
+  const SPX=P.split?axisBins(P.split,V):null;
+  const splitL=SPX?SPX.L.slice(0,8):[null];
+  const tooMany=SPX&&SPX.L.length>8;
+  const leg=P.split?splitL.map((l,i)=>`<span><i style="background:${S[i]}"></i>${esc(P.split)} = ${esc(l)}</span>`).join('')+(tooMany?'<span class="mute">Only the first 8 groups are drawn.</span>':''):'';
+  $('legend').innerHTML=leg;
+  const xk=`Because ${P.x} is `;
+  const b3=P.type==='inter'?[P.ia,P.ib].filter(c=>axisBins(c,V).binned)
+    :P.type==='main'?P.factors.filter(c=>axisBins(c,V).binned)
+    :P.split&&axisBins(P.split,V).binned?[P.split]:[];
+  const bnote=b3.length?` ${b3.join(' and ')} ${b3.length>1?'are numbers, so they are':'is a number, so it is'} grouped into 8 equal ranges.`:'';
+  $('cap').textContent=(P.type==='main'?`Each panel shows the mean ${P.y} at each level of one variable. The dashed line is the mean ${P.y} over all the selected days.`:P.type==='inter'?`Each line connects the mean ${P.y} at each level of ${P.ia}, for one level of ${P.ib}.`:P.type==='hist'?`Each bar counts the days whose ${P.y} fell in that range.${P.norm?' Heights are the percent of each group\'s days, so groups of different sizes can be compared.':''}`:P.type==='bar'?`${P.cstyle==='bars'?'Each bar':'Each point'} shows the ${P.stat} of ${P.y} over the days at one value of ${P.x}.${P.cstyle==='points joined by a line'?' The line joins them in the order shown on the x axis.':''}`:P.type==='line'?`${xk}a date, each point is the average ${P.y} per day over one ${P.agg.replace('daily','day').replace('weekly','week').replace('monthly','month').replace('yearly','year')}.`:(P.vstyle==='bars'?`Each bar is the mean ${P.y} at one value of ${P.x}.`:P.vstyle==='line'?`The line joins the mean ${P.y} at each value of ${P.x}.`:`Each dot is one day.${P.vstyle==='dots and line'?` The line joins the mean ${P.y} at each value of ${P.x}.`:''}`)+(P.avg&&(P.vstyle==='dots'||P.vstyle==='dots and line')?` The heavier line joins the average ${P.y} in each of ${P.abins} equal ranges of ${P.x}.`:'')+(P.vstyle==='bars'&&new Set(V.map(r=>r[P.x])).size*splitL.length>280?` That is ${new Set(V.map(r=>r[P.x])).size} values of ${P.x}${splitL.length>1?` in each of ${splitL.length} groups`:''}, so the bars are too narrow to read \u2014 filter to fewer, or draw a line instead.`:''))+bnote;
+  if(!V.length){g.fillStyle=mute;g.fillText('No days match the filters.',M.l,M.t+30);return}
+  const sub=l=>l===null?V:V.filter(r=>SPX.key(r)===l);
+  const yAxis=(lo,hi,label)=>{const ts=ticks(lo,hi,6);g.strokeStyle=line;g.fillStyle=mute;g.textAlign='right';g.textBaseline='middle';ts.forEach(t=>{const y=M.t+ph-(t-lo)/(hi-lo)*ph;if(y<M.t-1||y>M.t+ph+1)return;g.beginPath();g.moveTo(M.l,y);g.lineTo(M.l+pw,y);g.stroke();g.fillText(fmt(t),M.l-8,y)});g.save();g.translate(14,M.t+ph/2);g.rotate(-Math.PI/2);g.textAlign='center';g.fillStyle=ink;g.fillText(label,0,0);g.restore()};
+  const xLabel=t=>{g.fillStyle=ink;g.textAlign='center';g.textBaseline='alphabetic';g.fillText(t,M.l+pw/2,H-8)};
+  if(P.type==='bar'){
+    const cats=levels(P.x,V);const data=cats.map(c=>splitL.map(l=>{const a=sub(l).filter(r=>r[P.x]===c);const s=summ(a.map(r=>r[P.y]));const v=P.stat==='count'?a.length:s.n?(P.stat==='mean'?s.mean:P.stat==='median'?s.med:s.sum):NaN;const e=P.stat==='mean'&&P.spread!=='none'&&s.n?(P.spread==='±1 SD'?s.sd:s.se):0;return{v,e,n:a.length}}));
+    const all=data.flat().filter(d=>!Number.isNaN(d.v));let hi=Math.max(...all.map(d=>d.v+d.e)),lo=Math.min(...all.map(d=>d.v-d.e));
+    if(P.zero)lo=Math.min(0,lo);else{const pad=(hi-lo)*.1||1;lo-=pad;hi+=pad}hi+=(hi-lo)*.04;
+    yAxis(lo,hi,`${P.stat==='count'?'count of days':P.stat+' of '+P.y}`);
+    const bw=pw/cats.length,inner=bw*.78/splitL.length;
+    const mk=P.cstyle!=='bars';
+    g.textAlign='center';g.textBaseline='top';
+    const every=Math.ceil(cats.length/Math.max(1,Math.floor(pw/70)));
+    const Yv=v=>M.t+ph-(v-lo)/(hi-lo)*ph;
+    const dodge=j=>mk&&splitL.length>1?(j-(splitL.length-1)/2)*Math.min(11,bw*.22):0;
+    const tipOf=(c,j,d)=>`${P.x} = ${c}${splitL[j]!==null?`, ${P.split} = ${splitL[j]}`:''}: ${fmt(d.v,2)}${d.e?` \u00b1 ${fmt(d.e,2)}`:''} (n = ${d.n})`;
+    if(P.cstyle==='points joined by a line')splitL.forEach((l,j)=>{
+      const pts=cats.map((c,i)=>({x:M.l+(i+.5)*bw+dodge(j),v:data[i][j].v})).filter(q=>!Number.isNaN(q.v));
+      if(pts.length<2)return;g.strokeStyle=S[j];g.lineWidth=2;g.beginPath();
+      pts.forEach((q,k)=>{k?g.lineTo(q.x,Yv(q.v)):g.moveTo(q.x,Yv(q.v))});g.stroke();g.lineWidth=1});
+    cats.forEach((c,i)=>{data[i].forEach((d,j)=>{if(Number.isNaN(d.v))return;const y=Yv(d.v);let xm;
+      if(mk){xm=M.l+(i+.5)*bw+dodge(j);g.fillStyle=S[j];g.beginPath();g.arc(xm,y,4.2,0,7);g.fill();g.strokeStyle=ink;g.lineWidth=1;g.stroke();
+        hits.push({px:xm,py:y,t:tipOf(c,j,d)})}
+      else{const x=M.l+i*bw+bw*.11+j*inner;xm=x+inner/2;const y0=M.t+ph-(Math.max(lo,0)-lo)/(hi-lo)*ph;const top=Math.min(y,P.zero?y0:M.t+ph),bot=Math.max(y,P.zero?y0:M.t+ph);g.fillStyle=S[j];g.fillRect(x+1,top,inner-2,bot-top);
+        hits.push({x0:x,x1:x+inner,y0:M.t,y1:M.t+ph,t:tipOf(c,j,d)})}
+      if(d.e){g.strokeStyle=ink;g.lineWidth=1.5;const ya=Yv(d.v+d.e),yb=Yv(d.v-d.e);g.beginPath();g.moveTo(xm,ya);g.lineTo(xm,yb);g.moveTo(xm-5,ya);g.lineTo(xm+5,ya);g.moveTo(xm-5,yb);g.lineTo(xm+5,yb);g.stroke();g.lineWidth=1}});
+      if(i%every===0){g.fillStyle=mute;g.textAlign='center';g.textBaseline='top';let lab=String(c);const maxw=bw*every-6;while(g.measureText(lab).width>maxw&&lab.length>3)lab=lab.slice(0,-2)+'\u2026';g.fillText(lab,M.l+i*bw+bw/2,M.t+ph+8)}});
+    if(P.fit){
+      const cn=catNums(P.x,V);
+      if(cn){
+        const xv=new Map();cn.L.forEach((l,k)=>xv.set(l,cn.X[k]));
+        const xs=cats.map(c=>xv.get(c)),sxp=cats.map((c,i)=>M.l+(i+.5)*bw);
+        const step=xs.length>1?xs[1]-xs[0]:1,even=xs.every((v,i)=>i===0||Math.abs(v-xs[i-1]-step)<1e-9);
+        const out=[];
+        splitL.forEach((l,j)=>{
+          const pts=cats.map((c,i)=>[xv.get(c),data[i][j].v]).filter(q=>Number.isFinite(q[1]));
+          const f=regress(pts);if(!f)return;
+          const sy=xs.map(v=>Yv(f.a+f.b*v));
+          g.save();g.setLineDash([]);g.strokeStyle=ink;g.lineWidth=3.6;g.beginPath();sxp.forEach((x,i)=>{i?g.lineTo(x,sy[i]):g.moveTo(x,sy[i])});g.stroke();
+          g.strokeStyle=S[j];g.lineWidth=2.2;g.stroke();g.restore();
+          const mid=Math.floor(sxp.length/2);
+          hits.unshift({px:sxp[mid],py:sy[mid],t:`fit${splitL[j]===null?'':' for '+splitL[j]}: slope ${pm(f.b,f.seb)}, n = ${f.n}`});
+          out.push(`<tr><td>${splitL[j]===null?'all days':esc(P.split+' = '+splitL[j])}</td>`+
+            `<td class="n">${pm(f.b,f.seb)}</td>`+
+            `<td class="n">${pm(f.a,f.sea)}</td><td class="n">${f.n}</td><td class="n">${f.r2.toFixed(3)}</td><td class="n">${f.resid.toFixed(3)}</td></tr>`);
+        });
+        $('fitout').innerHTML=out.length?`<div class="scroll" style="margin-top:14px"><table>`+
+          `<thead><tr><th>fitted to</th><th class="n">slope (${esc(P.y)} per ${esc(P.x)})</th>`+
+          `<th class="n">intercept (${esc(P.y)} at ${esc(P.x)} = 0)</th><th class="n">n</th>`+
+          `<th class="n">R&sup2;</th><th class="n">residual SD</th></tr></thead><tbody>${out.join('')}</tbody></table></div>`+
+          `<p class="small mute">Least squares, fitted to the ${P.stat}s shown on the chart \u2014 one point per ${esc(P.x)}, not one per day, so n is the number of ${esc(P.x)} groups. `+
+          `The &plusmn; figures are standard errors. R&sup2; is the share of the variation in those points the line accounts for; the residual SD is the typical distance of a point from the line.`+
+          (even?'':` The x axis gives every ${esc(P.x)} the same width, and the ones you have selected are not evenly spaced, so the fitted line bends here even though it is straight in ${esc(P.x)} units.`)+`</p>`:'';
+      }
+    }
+    xLabel(P.x);
+  }
+  if(P.type==='line'){
+    const key=r=>{if(P.agg==='daily')return r.date;if(P.agg==='monthly')return r.date.slice(0,7)+'-15';if(P.agg==='yearly')return r.year+'-07-01';const d=new Date(r.date+'T12:00:00Z');const wd=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-wd);return d.toISOString().slice(0,10)};
+    const series=splitL.map(l=>{const m=new Map();sub(l).forEach(r=>{const k=key(r);const e=m.get(k)||[0,0];if(typeof r[P.y]==='number'&&!Number.isNaN(r[P.y])){e[0]+=r[P.y];e[1]++}m.set(k,e)});return [...m].filter(([,e])=>e[1]).map(([k,e])=>({t:Date.parse(k+'T12:00:00Z'),v:e[0]/e[1],k})).sort((a,b)=>a.t-b.t)});
+    const pts=series.flat();if(!pts.length)return;
+    const t0=Math.min(...pts.map(p=>p.t)),t1=Math.max(...pts.map(p=>p.t));let lo=Math.min(...pts.map(p=>p.v)),hi=Math.max(...pts.map(p=>p.v));
+    if(P.zero)lo=Math.min(0,lo);else{const pad=(hi-lo)*.06||1;lo-=pad;hi+=pad}
+    yAxis(lo,hi,`${P.y} (average per ${P.agg.replace('ly','').replace('dai','day')})`);
+    const X=t=>M.l+(t1===t0?pw/2:(t-t0)/(t1-t0)*pw),Y=v=>M.t+ph-(v-lo)/(hi-lo)*ph;
+    const y0=new Date(t0).getUTCFullYear(),y1=new Date(t1).getUTCFullYear();const step=Math.ceil((y1-y0+1)/Math.max(1,Math.floor(pw/60)));
+    g.fillStyle=mute;g.textAlign='center';g.textBaseline='top';for(let y=y0;y<=y1+1;y+=step){const t=Date.UTC(y,0,1);if(t<t0-1e7||t>t1+1e7)continue;const x=X(t);g.strokeStyle=line;g.beginPath();g.moveTo(x,M.t+ph);g.lineTo(x,M.t+ph+5);g.stroke();g.fillText(y,x,M.t+ph+8)}
+    series.forEach((s,i)=>{g.strokeStyle=S[i];g.fillStyle=S[i];g.lineWidth=1.6;if(P.draw==='lines'){g.beginPath();s.forEach((p,j)=>{const x=X(p.t),y=Y(p.v);j?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()}else s.forEach(p=>{g.fillRect(X(p.t)-1.2,Y(p.v)-1.2,2.4,2.4)});g.lineWidth=1;
+      s.forEach(p=>hits.push({px:X(p.t),py:Y(p.v),t:`${p.k}${splitL[i]!==null?`, ${P.split} = ${splitL[i]}`:''}: ${fmt(p.v,1)}`}))});
+    xLabel('date');
+  }
+  if(P.type==='hist'){
+    const vals=V.map(r=>r[P.y]).filter(v=>typeof v==='number'&&!Number.isNaN(v));if(!vals.length)return;
+    let lo=Math.min(...vals),hi=Math.max(...vals);if(hi===lo)hi=lo+1;const nb=P.bins,w=(hi-lo)/nb;
+    const counts=splitL.map(l=>{const c=new Array(nb).fill(0);const a=sub(l).map(r=>r[P.y]).filter(v=>typeof v==='number'&&!Number.isNaN(v));a.forEach(v=>c[Math.min(nb-1,Math.floor((v-lo)/w))]++);return P.norm?c.map(x=>a.length?x/a.length*100:0):c});
+    const top=Math.max(...counts.flat())*1.06||1;yAxis(0,top,P.norm?'% of days':'number of days');
+    const X=v=>M.l+(v-lo)/(hi-lo)*pw,Y=v=>M.t+ph-v/top*ph;
+    counts.forEach((c,i)=>{g.strokeStyle=S[i];g.fillStyle=S[i];g.globalAlpha=splitL.length>1?.22:.85;c.forEach((v,b)=>{g.fillRect(X(lo+b*w)+.5,Y(v),Math.max(1,X(lo+(b+1)*w)-X(lo+b*w)-1),M.t+ph-Y(v))});g.globalAlpha=1;if(splitL.length>1){g.lineWidth=2;g.beginPath();c.forEach((v,b)=>{const xa=X(lo+b*w),xb=X(lo+(b+1)*w);b?g.lineTo(xa,Y(v)):g.moveTo(xa,M.t+ph);g.lineTo(xa,Y(v));g.lineTo(xb,Y(v))});g.lineTo(X(hi),M.t+ph);g.stroke();g.lineWidth=1}
+      c.forEach((v,b)=>hits.push({x0:X(lo+b*w),x1:X(lo+(b+1)*w),y0:M.t,y1:M.t+ph,t:`${P.norm?fmt(v,1)+'% of':fmt(v,0)} ${splitL[i]!==null?`${P.split} = ${splitL[i]} `:''}days had ${fmt(lo+b*w,0)} to ${fmt(lo+(b+1)*w,0)} ${P.y}`,stack:i}))});
+    const ts=ticks(lo,hi,Math.max(2,Math.floor(pw/90)));g.fillStyle=mute;g.textAlign='center';g.textBaseline='top';ts.forEach(t=>{if(t<lo||t>hi)return;g.fillText(fmt(t),X(t),M.t+ph+8)});
+    xLabel(`${P.y} on a single day`);
+  }
+  if(P.type==='scatter'){
+    const ok=r=>typeof r[P.sx]==='number'&&typeof r[P.sy]==='number'&&!Number.isNaN(r[P.sx])&&!Number.isNaN(r[P.sy]);const a=V.filter(ok);if(!a.length)return;
+    let xl=Math.min(...a.map(r=>r[P.sx])),xh=Math.max(...a.map(r=>r[P.sx])),yl=Math.min(...a.map(r=>r[P.sy])),yh=Math.max(...a.map(r=>r[P.sy]));const px=(xh-xl)*.03||1,py=(yh-yl)*.05||1;xl-=px;xh+=px;yl-=py;yh+=py;
+    if(P.vstyle==='bars'&&P.zero){yl=Math.min(0,yl);yh=Math.max(0,yh)}
+    yAxis(yl,yh,P.sy);const X=v=>M.l+(v-xl)/(xh-xl)*pw,Y=v=>M.t+ph-(v-yl)/(yh-yl)*ph;
+    const ts=ticks(xl,xh,Math.max(2,Math.floor(pw/90)));g.fillStyle=mute;g.textAlign='center';g.textBaseline='top';ts.forEach(t=>{if(t<xl||t>xh)return;g.fillText(fmt(t),X(t),M.t+ph+8)});
+    const meanPerX=l=>{const m=new Map();sub(l).filter(ok).forEach(r=>{const k=r[P.sx];const e=m.get(k)||[0,0];e[0]+=r[P.sy];e[1]++;m.set(k,e)});return [...m].map(([k,e])=>({x:k,y:e[0]/e[1],n:e[1]})).sort((q,w)=>q.x-w.x)};
+    const aggTip=(q,i)=>`${P.sx} = ${fmt(q.x)}${splitL[i]!==null?`, ${P.split} = ${splitL[i]}`:''}: ${P.sy} = ${fmt(q.y,2)}${q.n>1?` (mean of ${q.n} days)`:''}`;
+    const showDots=P.vstyle==='dots'||P.vstyle==='dots and line';
+    if(showDots)splitL.forEach((l,i)=>{g.fillStyle=S[i];g.globalAlpha=.7;sub(l).filter(ok).forEach(r=>{const x=X(r[P.sx]),y=Y(r[P.sy]);g.beginPath();g.arc(x,y,2.6,0,7);g.fill();hits.push({px:x,py:y,t:`${rowLab(r)}${P.sx} = ${fmt(r[P.sx])}, ${P.sy} = ${fmt(r[P.sy])}`})});g.globalAlpha=1});
+    if(P.vstyle==='line'||P.vstyle==='dots and line')splitL.forEach((l,i)=>{const s=meanPerX(l);if(!s.length)return;
+      g.strokeStyle=S[i];g.lineWidth=1.8;g.beginPath();s.forEach((q,j)=>{j?g.lineTo(X(q.x),Y(q.y)):g.moveTo(X(q.x),Y(q.y))});g.stroke();g.lineWidth=1;
+      if(!showDots)s.forEach(q=>hits.push({px:X(q.x),py:Y(q.y),t:aggTip(q,i)}))});
+    if(P.vstyle==='bars'){
+      const per=splitL.map(l=>meanPerX(l));const nx=new Set(per.flat().map(q=>q.x)).size||1;
+      const slot=pw/nx,gw=slot*.82/splitL.length,zy=0>=yl&&0<=yh?Y(0):0<yl?M.t+ph:M.t,y0=P.zero?zy:M.t+ph;
+      per.forEach((s,i)=>{g.fillStyle=S[i];s.forEach(q=>{const cx=X(q.x)-slot*.41+(i+.5)*gw,y=Y(q.y),top=Math.min(y,y0),bot=Math.max(y,y0);
+        g.fillRect(cx-gw/2,top,Math.max(1,gw-1),Math.max(1,bot-top));
+        hits.push({x0:cx-gw/2,x1:cx+gw/2,y0:M.t,y1:M.t+ph,t:aggTip(q,i)})})});
+    }
+    if(P.avg&&showDots){const nb=P.abins,w=(xh-xl-2*px)/nb,x0=xl+px;splitL.forEach((l,i)=>{const acc=Array.from({length:nb},()=>[0,0]);sub(l).filter(ok).forEach(r=>{const b=Math.min(nb-1,Math.floor((r[P.sx]-x0)/w));acc[b][0]+=r[P.sy];acc[b][1]++});const pts=acc.map((a,b)=>a[1]?{x:x0+(b+.5)*w,y:a[0]/a[1],n:a[1],b}:null).filter(Boolean);g.strokeStyle=ink;g.lineWidth=4;g.beginPath();pts.forEach((p,j)=>{j?g.lineTo(X(p.x),Y(p.y)):g.moveTo(X(p.x),Y(p.y))});g.stroke();g.strokeStyle=S[i];g.lineWidth=2.2;g.stroke();g.lineWidth=1;pts.forEach(p=>{g.fillStyle=S[i];g.beginPath();g.arc(X(p.x),Y(p.y),4.5,0,7);g.fill();g.strokeStyle=ink;g.stroke();hits.unshift({px:X(p.x),py:Y(p.y),t:`average ${P.sy} = ${fmt(p.y,1)} for ${P.sx} ${fmt(x0+p.b*w,1)} to ${fmt(x0+(p.b+1)*w,1)}${splitL[i]!==null?`, ${P.split} = ${splitL[i]}`:''} (n = ${p.n})`})})})}
+    if(P.fit){
+      const out=[];
+      splitL.forEach((l,i)=>{
+        const pts=sub(l).filter(ok).map(r=>[r[P.sx],r[P.sy]]);
+        const f=regress(pts); if(!f)return;
+        g.save();g.setLineDash([]);g.strokeStyle=ink;g.lineWidth=3.6;
+        g.beginPath();g.moveTo(X(f.xmin),Y(f.a+f.b*f.xmin));g.lineTo(X(f.xmax),Y(f.a+f.b*f.xmax));g.stroke();
+        g.strokeStyle=S[i];g.lineWidth=2.2;g.stroke();g.restore();
+        const perDec=P.sx==='year'?` <span class="mute">(${pm(f.b*10,f.seb*10)} per decade)</span>`:'';
+        out.push(`<tr><td>${splitL[i]===null?'all days':esc(P.split+' = '+splitL[i])}</td>`+
+          `<td class="n">${pm(f.b,f.seb)}${perDec}</td><td class="n">${pm(f.a,f.sea)}</td>`+
+          `<td class="n">${f.n}</td><td class="n">${f.r2.toFixed(3)}</td><td class="n">${f.resid.toFixed(3)}</td></tr>`);
+        hits.unshift({px:X((f.xmin+f.xmax)/2),py:Y(f.a+f.b*(f.xmin+f.xmax)/2),
+          t:`fit${splitL[i]===null?'':' for '+splitL[i]}: slope ${pm(f.b,f.seb)}, n = ${f.n}`});
+      });
+      $('fitout').innerHTML=out.length?`<div class="scroll" style="margin-top:14px"><table>`+
+        `<thead><tr><th>fitted to</th><th class="n">slope (${esc(P.sy)} per ${esc(P.sx)})</th>`+
+        `<th class="n">intercept (${esc(P.sy)} at ${esc(P.sx)} = 0)</th><th class="n">n</th>`+
+        `<th class="n">R&sup2;</th><th class="n">residual SD</th></tr></thead><tbody>${out.join('')}</tbody></table></div>`+
+        `<p class="small mute">Least squares, fitted to the individual days. The &plusmn; figures are standard errors: roughly, the slope is likely to lie within two of them of the value shown. R&sup2; is the share of the variation in ${esc(P.sy)} the line accounts for; the residual SD is the typical distance of a point from the line, in ${esc(P.sy)} units.</p>`:'';
+    }
+    xLabel(P.sx);
+  }
+  const xLabs=(L,xs,slot,yb)=>{g.fillStyle=mute;g.font='13px Inter, sans-serif';const lab=L.map(l=>{let t=String(l);if(t.length>16)t=t.slice(0,15)+'…';return t});const wide=Math.max(...lab.map(t=>g.measureText(t).width))>slot-4;const every=wide&&slot<16?Math.ceil(16/slot):1;lab.forEach((t,i)=>{if(i%every)return;if(wide){g.save();g.translate(xs[i],yb+8);g.rotate(-Math.PI/4);g.textAlign='right';g.textBaseline='middle';g.fillText(t,0,0);g.restore()}else{g.textAlign='center';g.textBaseline='top';g.fillText(t,xs[i],yb+8)}});g.font='14px Inter, sans-serif'};
+  const meanAt=(a)=>summ(a.map(r=>r[P.y]));
+  if(P.type==='main'){
+    const F=P.factors;if(!F.length){g.fillStyle=mute;g.textAlign='left';g.fillText('Tick at least one variable above.',M.l,M.t+30);return}
+    const grand=meanAt(V);const se=P.sespread==='±1 SE';
+    const pan=F.map(f=>{const B2=axisBins(f,V),L=B2.L;return{f,L,m:L.map(l=>meanAt(V.filter(r=>B2.key(r)===l)))}});
+    const vals=pan.flatMap(p=>p.m.filter(q=>q.n).flatMap(q=>[q.mean-(se?q.se:0),q.mean+(se?q.se:0)])).concat([grand.mean]);
+    let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.12||1;lo-=pad;hi+=pad;
+    const Y=v=>M.t+ph-(v-lo)/(hi-lo)*ph,gap=22,pwi=(pw-gap*(F.length-1))/F.length;
+    const ts=ticks(lo,hi,6);g.fillStyle=mute;g.textAlign='right';g.textBaseline='middle';ts.forEach(t=>{if(t<lo||t>hi)return;g.fillText(fmt(t),M.l-8,Y(t))});
+    g.save();g.translate(14,M.t+ph/2);g.rotate(-Math.PI/2);g.textAlign='center';g.fillStyle=ink;g.fillText('mean of '+P.y,0,0);g.restore();
+    pan.forEach((p,k)=>{const x0=M.l+k*(pwi+gap),slot=pwi/p.L.length,xs=p.L.map((_,i)=>x0+(i+.5)*slot);
+      g.strokeStyle=line;ts.forEach(t=>{if(t<lo||t>hi)return;g.beginPath();g.moveTo(x0,Y(t));g.lineTo(x0+pwi,Y(t));g.stroke()});
+      g.strokeStyle=mute;g.beginPath();g.moveTo(x0,M.t);g.lineTo(x0,M.t+ph);g.lineTo(x0+pwi,M.t+ph);g.stroke();
+      g.setLineDash([6,5]);g.strokeStyle=mute;g.beginPath();g.moveTo(x0,Y(grand.mean));g.lineTo(x0+pwi,Y(grand.mean));g.stroke();g.setLineDash([]);
+      g.fillStyle=ink;g.textAlign='center';g.textBaseline='bottom';g.font='600 14px Inter, sans-serif';g.fillText(p.f,x0+pwi/2,M.t-12);g.font='14px Inter, sans-serif';
+      g.strokeStyle=S[0];g.lineWidth=2.2;g.beginPath();let st=false;p.m.forEach((q,i)=>{if(!q.n){st=false;return}st?g.lineTo(xs[i],Y(q.mean)):g.moveTo(xs[i],Y(q.mean));st=true});g.stroke();g.lineWidth=1;
+      p.m.forEach((q,i)=>{if(!q.n)return;if(se){g.strokeStyle=ink;g.beginPath();g.moveTo(xs[i],Y(q.mean-q.se));g.lineTo(xs[i],Y(q.mean+q.se));g.moveTo(xs[i]-4,Y(q.mean-q.se));g.lineTo(xs[i]+4,Y(q.mean-q.se));g.moveTo(xs[i]-4,Y(q.mean+q.se));g.lineTo(xs[i]+4,Y(q.mean+q.se));g.stroke()}
+        g.fillStyle=S[0];g.beginPath();g.arc(xs[i],Y(q.mean),4.5,0,7);g.fill();hits.push({px:xs[i],py:Y(q.mean),t:`${p.f} = ${p.L[i]}: mean ${P.y} ${fmt(q.mean,1)}${se?` ± ${fmt(q.se,1)}`:''} (n = ${q.n})`})});
+      xLabs(p.L,xs,slot,M.t+ph)});
+    hits.push({px:-999,py:-999,t:''});
+    return;
+  }
+  if(P.type==='inter'){
+    const AB=axisBins(P.ia,V),A=AB.L,se=P.sespread==='±1 SE',slot=pw/A.length,xs=A.map((_,i)=>M.l+(i+.5)*slot);
+    const ser=splitL.map(l=>A.map(a=>meanAt(V.filter(r=>AB.key(r)===a&&(l===null||SPX.key(r)===l)))));
+    const vals=ser.flat().filter(q=>q.n).flatMap(q=>[q.mean-(se?q.se:0),q.mean+(se?q.se:0)]);if(!vals.length)return;
+    let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.08||1;lo-=pad;hi+=pad;
+    yAxis(lo,hi,'mean of '+P.y);const Y=v=>M.t+ph-(v-lo)/(hi-lo)*ph;
+    ser.forEach((m,j)=>{g.strokeStyle=S[j];g.lineWidth=2.2;g.beginPath();let st=false;m.forEach((q,i)=>{if(!q.n){st=false;return}st?g.lineTo(xs[i],Y(q.mean)):g.moveTo(xs[i],Y(q.mean));st=true});g.stroke();g.lineWidth=1;
+      m.forEach((q,i)=>{if(!q.n)return;if(se){g.strokeStyle=S[j];g.beginPath();g.moveTo(xs[i],Y(q.mean-q.se));g.lineTo(xs[i],Y(q.mean+q.se));g.stroke()}g.fillStyle=S[j];g.beginPath();g.arc(xs[i],Y(q.mean),4,0,7);g.fill();
+        hits.push({px:xs[i],py:Y(q.mean),t:`${P.ia} = ${A[i]}, ${P.ib} = ${splitL[j]}: mean ${P.y} ${fmt(q.mean,1)}${se?` ± ${fmt(q.se,1)}`:''} (n = ${q.n})`})})});
+    xLabs(A,xs,slot,M.t+ph);xLabel(P.ia);
+  }
+  g.strokeStyle=mute;g.beginPath();g.moveTo(M.l,M.t);g.lineTo(M.l,M.t+ph);g.lineTo(M.l+pw,M.t+ph);g.stroke();
+}
+$('fig').addEventListener('mousemove',e=>{const b=$('fig').getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;let best=null,bd=100;
+  for(const h of hits){if(h.x0!=null){if(x>=h.x0&&x<=h.x1&&y>=h.y0&&y<=h.y1){best=h;break}}else{const d=(h.px-x)**2+(h.py-y)**2;if(d<bd){bd=d;best=h}}}
+  if(best){tip.style.display='block';tip.textContent=best.t;const tw=tip.offsetWidth;tip.style.left=Math.min(b.width-tw-6,Math.max(6,x+12))+'px';tip.style.top=Math.max(6,y-34)+'px'}else tip.style.display='none'});
+$('fig').addEventListener('mouseleave',()=>tip.style.display='none');
+const ro=new ResizeObserver(()=>drawPlot());ro.observe($('fig'));
+
+/* load */
+fetch('births_moon.csv').then(r=>{if(!r.ok)throw Error(r.status);return r.text()}).then(txt=>{
+  const lines=txt.trim().split(/\r?\n/);const hd=lines[0].split(',');
+  rows=lines.slice(1).map(l=>{const p=l.split(',');const o={};hd.forEach((h,i)=>o[h]=NUMS.has(h)?+p[i]:p[i]);return o});
+  $('nrows').textContent=rows.length.toLocaleString();
+  state.calc=state.calc.filter(c=>{try{applyCalc(c);return true}catch(e){return false}});
+  buildFilters();buildControls();renderHyp();refresh();show(state.hyp?'plot':'about');
+}).catch(e=>{$('predbar').innerHTML=`<p class="err">The data file could not be loaded (${esc(e.message)}).</p>`;renderHyp();show('about')});
+}
+</script>
+</body>
+</html>
